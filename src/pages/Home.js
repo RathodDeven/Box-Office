@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useCallback} from 'react'
 import ActorGrid from '../components/actor/ActorGrid';
 import CustomRadio from '../components/CustomRadio';
 import MainPageLayout from '../components/MainPageLayout'
@@ -7,14 +7,25 @@ import {apiGet} from '../misc/config';
 import { useLastQuery } from '../misc/custom-hooks';
 import { RadioInputsWrapper, SearchButtonWrapper, SearchInput } from './Home.styled';
 
+const RenderResults = (results) => {
+    if(results && results.length === 0){
+        return <div>No results</div>
+    }else if(results && results.length > 0){
+        return results[0].show ? <ShowGrid data={results}/> : <ActorGrid data={results}/>
+    }else{
+        return;
+    }
+}
+
 const Home = () => {
     const [input, setInput] = useLastQuery();
     const [results, setResults] = useState(null);
     const [searchOption, setSearchOption] = useState('shows');
     const isShows = searchOption === 'shows';
-    const onInputChange = (e) => {
+
+    const onInputChange = useCallback((e) => {
         setInput(e.target.value);
-    }
+    },[setInput])
 
     const onSearch = () => {
         apiGet(`/search/${searchOption}?q=${input}`).then(result => {
@@ -22,24 +33,15 @@ const Home = () => {
         })
     }
     const onKeyDown = e => {
-        if(e.keyCode === 13){
+        if(e.key === 'Enter'){
             onSearch();
         }
     }
+    
 
-    const RenderResults = () => {
-        if(results && results.length === 0){
-            return <div>No results</div>
-        }else if(results && results.length > 0){
-            return results[0].show ? <ShowGrid data={results}/> : <ActorGrid data={results}/>
-        }else{
-            return;
-        }
-    }
-
-    const onRadioChange = (e) => {
-        setSearchOption(e.target.value);
-    }
+    const onRadioChange = useCallback(e => {
+        setSearchOption(e.target.value)},[]);
+    
     return (
        <MainPageLayout>
            <SearchInput type="text" placeholder="search here" onChange={onInputChange} onKeyDown={onKeyDown} value={input}/>
@@ -67,7 +69,7 @@ const Home = () => {
            <SearchButtonWrapper>
            <button type="button" onClick={onSearch} >Search</button>
            </SearchButtonWrapper>
-           {RenderResults()}
+           {RenderResults(results)}
        </MainPageLayout>
     )
 }

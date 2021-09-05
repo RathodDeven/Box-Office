@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import ShowCard from './ShowCard'
 
 import { FlexGrid } from '../styled'
@@ -14,13 +14,13 @@ const ShowGrid = ({data}) => {
                 data.map( ({ show }) => {
                 const isStarred = starredShows.includes(show.id);
 
-                const onStarClick = () => {
+                const onStarClick = useCallback( () => {
                     if(isStarred){
                         dispatchStarredShows({type: 'REMOVE', showID: show.id});
                     }else{
                         dispatchStarredShows({type: 'ADD', showID: show.id});
                     }
-                }
+                },[isStarred,show.id])
                 return(
                     
                 <ShowCard 
